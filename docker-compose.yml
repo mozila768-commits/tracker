@@ -1,0 +1,36 @@
+name: tracker
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tracker
+      POSTGRES_PASSWORD: tracker
+      POSTGRES_DB: tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - tracker_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker -d tracker"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://tracker:tracker@db:5432/tracker?sslmode=disable
+      STATIC_DIR: /static
+      TZ: Asia/Bishkek
+    volumes:
+      - ./frontend/dist:/static:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  tracker_pg:
