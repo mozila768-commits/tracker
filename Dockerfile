@@ -4,7 +4,7 @@ WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
-RUN npx vite build
+RUN node node_modules/vite/bin/vite.js build
 
 # --- 2. сборка Go-сервера ---
 FROM golang:1.25-alpine AS build
